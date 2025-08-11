@@ -1,0 +1,41 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Environments
+env/
+venv/
+ml/            # your conda environment folder, if inside project directory
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints
+
+# VS Code settings
+.vscode/
+
+# MacOS system files
+.DS_Store
+
+# Logs and databases
+*.log
+*.sqlite3
+
+# Ignore data folder (assuming large raw datasets)
+data/
+
+# Ignore images folder if you want (images might be big)
+images/
+
+# Keep saved_models! Do NOT ignore it since you want it for Streamlit
+
+# Ignore other large files or folders you don't want in Git
+*.ckpt
+*.pt      # if you have temporary or training checkpoints you don't want
+
+# Ignore Python egg files
+*.egg-info/
+dist/
+build/
