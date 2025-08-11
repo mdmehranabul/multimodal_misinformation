@@ -104,7 +104,8 @@ if caption and uploaded_file:
 
         st.subheader(f"Prediction: {label_map[predicted_class]}")
         label_names = [label_map[i] for i in range(len(label_map))]
-        prob_series = pd.Series(probs, index=label_names)
+        probs_percent = np.round(probs * 100).astype(int)
+        prob_series = pd.Series(probs_percent, index=label_names)
         st.bar_chart(prob_series)
     except Exception as e:
         st.error(f"Prediction failed: {e}")
