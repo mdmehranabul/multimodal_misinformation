@@ -33,9 +33,11 @@ images/
 
 # Ignore other large files or folders you don't want in Git
 *.ckpt
-*.pt      # if you have temporary or training checkpoints you don't want
 
 # Ignore Python egg files
 *.egg-info/
 dist/
 build/
+
+# Ignore pickle model files
+*.pkl
