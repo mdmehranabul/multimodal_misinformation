@@ -1,5 +1,3 @@
-# utils/preprocessing.py
-
 import pandas as pd
 import requests
 from PIL import Image

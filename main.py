@@ -1,3 +1,4 @@
+import gc
 import sys
 sys.path.append(".")
 
@@ -8,7 +9,7 @@ import pandas as pd
 from tqdm import tqdm
 from sklearn.preprocessing import LabelEncoder
 from torch.utils.data import DataLoader
-import pickle
+import joblib  # <-- changed from pickle
 import math
 import random
 import numpy as np
@@ -48,21 +49,29 @@ tqdm.pandas()
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # -------------------
-# Helper functions for preprocessing checkpointing
+# Helper functions for preprocessing checkpointing (using joblib)
 # -------------------
 def save_df_checkpoint(df, filename):
-    with open(filename, 'wb') as f:
-        pickle.dump(df, f)
+    try:
+        joblib.dump(df, filename, compress=3)  # compress for smaller file size
+        # Verify save by loading immediately
+        _ = joblib.load(filename)
+        print(f"Checkpoint saved and verified: {filename}")
+    except Exception as e:
+        print(f"Error saving or verifying checkpoint {filename}: {e}")
 
 def load_df_checkpoint(filename):
     if os.path.exists(filename):
         try:
-            with open(filename, 'rb') as f:
-                return pickle.load(f)
+            df = joblib.load(filename)
+            print(f"Checkpoint loaded successfully: {filename}")
+            return df
         except Exception as e:
             print(f"Warning: Failed to load checkpoint {filename}: {e}")
             return None
-    return None
+    else:
+        print(f"Checkpoint file does not exist: {filename}")
+        return None
 
 def process_split_with_checkpoint_skip_done(df, split_name, checkpoint_file, batch_size=1000):
     import math
@@ -122,6 +131,11 @@ def process_split_with_checkpoint_skip_done(df, split_name, checkpoint_file, bat
         save_df_checkpoint(df, checkpoint_file)
         print(f"Checkpoint saved.")
 
+        del batch_df
+        gc.collect()
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
+
     return df
 
 # -------------------
@@ -144,9 +158,9 @@ image_transform = transforms.Compose([
 # Load datasets
 # -------------------
 print("Loading and cleaning data...")
-train_df = load_and_clean_data(TRAIN_PATH, sample_size=200, seed=42)
-valid_df = load_and_clean_data(VALID_PATH, sample_size=200, seed=42)
-test_df  = load_and_clean_data(TEST_PATH,  sample_size=200, seed=42)
+train_df = load_and_clean_data(TRAIN_PATH, sample_size=75000, seed=42)
+valid_df = load_and_clean_data(VALID_PATH, sample_size=10000, seed=42)
+test_df  = load_and_clean_data(TEST_PATH,  sample_size=10000, seed=42)
 
 def filter_missing_text_or_image(df):
     return df[(df['title'].notnull()) & (df['title'] != '') & (df['image_url'].notnull()) & (df['image_url'] != '')].reset_index(drop=True)
@@ -173,7 +187,7 @@ for df, split_name in zip([train_df, valid_df, test_df], ['train', 'valid', 'tes
         continue
 
     print(f"\nProcessing {split_name} split with checkpointing and skipping done rows...")
-    processed_df = process_split_with_checkpoint_skip_done(df, split_name, checkpoint_file, batch_size=1000)
+    processed_df = process_split_with_checkpoint_skip_done(df, split_name, checkpoint_file, batch_size=100)
     if split_name == 'train':
         train_df = processed_df
     elif split_name == 'valid':
@@ -218,7 +232,7 @@ for label_type in ['2_way_label_name', '6_way_label_name']:
 
     train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True)
     valid_loader = DataLoader(valid_dataset, batch_size=32)
-    test_loader  = DataLoader(test_dataset, batch_size=32)
+    test_loader = DataLoader(test_dataset, batch_size=32)
 
     output_dim = len(le.classes_)
     fusion_results = {}
