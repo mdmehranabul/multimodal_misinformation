@@ -9,3 +9,5 @@ seaborn
 matplotlib
 streamlit
 seaborn
+google-generativeai
+python-dotenv
