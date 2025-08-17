@@ -41,3 +41,6 @@ build/
 
 # Ignore pickle model files
 *.pkl
+
+# ignore env file
+*.env
