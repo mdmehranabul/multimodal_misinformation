@@ -1,24 +1,31 @@
-
 # 📚 Multimodal Misinformation Detection
 
-This project is a dissertation-level solution for detecting **misinformation in social media posts** using both **text and image modalities**. It leverages deep learning with **BERT** and **Vision Transformer (ViT)** models, using different **fusion strategies** to combine modalities and supports both **2-way** and **6-way** classification.
+This project is a **dissertation-level solution** for detecting **misinformation in social media posts** using both **text and image modalities**. It leverages **deep learning** with **BERT** and **Vision Transformer (ViT)** models, implements multiple **fusion strategies**, and supports both **2-way** and **6-way** classification. Additionally, it integrates **Gemini multimodal outputs** for benchmarking.
 
 ---
 
 ## 🚀 Features
 
-- **Text encoder**: BERT (`bert-base-uncased`)
-- **Image encoder**: Vision Transformer (`vit-base-patch16-224`)
-- **Fusion models supported**:
-  - Early Fusion
-  - Late Fusion
-  - Hybrid Fusion
-- **Supports both**:
-  - ✅ 2-Way classification (Real vs Misleading)
-  - ✅ 6-Way classification (Real, Satire, Misleading, Manipulated, Fake Connection, Imposter Content)
-- Includes:
-  - Univariate & Multivariate analysis
-  - Fully functional **Streamlit app** for end-user predictions
+* **Encoders:**
+
+  * 📝 Text → BERT (`bert-base-uncased`)
+  * 🖼️ Image → Vision Transformer (`vit-base-patch16-224`)
+* **Fusion Models:**
+
+  * 🔗 Early Fusion
+  * 🔗 Late Fusion
+  * 🔗 Hybrid Fusion
+* **Classification Tasks:**
+
+  * ✅ **2-Way:** Real vs Misleading
+  * ✅ **6-Way:** Real, Satire, Misleading, Manipulated, Fake Connection, Imposter Content
+* **Extras:**
+
+  * Unimodal baselines (`train_unimodal.py`)
+  * Embedding visualization (`view_embeddings.py`)
+  * Gemini multimodal benchmarking (`gemini_classifier.py`)
+  * Exploratory data analysis & statistical insights
+  * Fully functional **Streamlit app** for end-user predictions
 
 ---
 
@@ -26,21 +33,33 @@ This project is a dissertation-level solution for detecting **misinformation in 
 
 ```
 .
-├── main.py                      # Training + evaluation script
-├── models/
-│   ├── fusion_models.py         # Model architectures (early, late, hybrid)
-│   ├── dataset.py               # Multimodal dataset class
-│   └── training.py              # Training and evaluation utilities
-├── utils/
-│   ├── preprocessing.py         # Data cleaning, download, image prep
-│   ├── embedding_utils.py       # Text & image embedding generation
-│   └── analysis.py              # Label distribution & plotting
-├── streamlit_app.py             # Streamlit web app to test predictions
-├── saved_models/
-│   ├── hybrid_fusion_2_way_label_name.pt
-│   └── hybrid_fusion_6_way_label_name.pt
-├── data/
-│   └── multimodal_test_public.tsv
+├── data/                         # Dataset files
+├── images/                       # Supporting images/plots
+├── models/                       # Model architectures
+│   ├── dataset.py                # Dataset class
+│   ├── fusion_models.py          # Early, Late, Hybrid fusion models
+│   └── training.py               # Training/evaluation utilities
+├── plots/                        # Output plots
+├── saved_models/                 # Pre-trained & best checkpoints
+├── utils/                        # Preprocessing, embedding, and analysis scripts
+│
+├── analysis_stats.py              # Statistical analysis
+├── calc.py                        # Helper calculations
+├── check_checkpoints.py           # Debugging checkpoints
+├── check_missing_raw_fields.py    # Data validation
+├── check_train_embeddings.py      # Verify embedding generation
+├── config.py                      # Configurations
+├── gemini_classifier.py           # Gemini multimodal baseline
+├── gemini_output_2_way.csv        # Gemini 2-way predictions
+├── gemini_output_6_way.csv        # Gemini 6-way predictions
+├── main.py                        # Train & evaluate fusion models
+├── streamlit_app.py               # Streamlit web interface
+├── train_unimodal.py              # Train text-only & image-only baselines
+├── view_embeddings.py              # Embedding visualization
+│
+├── 2_way_label_distribution.png   # Label distribution plots
+├── 6_way_label_distribution.png
+├── post_year_distribution.png
 ├── requirements.txt
 └── README.md
 ```
@@ -49,58 +68,62 @@ This project is a dissertation-level solution for detecting **misinformation in 
 
 ## 📊 Exploratory Analysis
 
-Included inside `utils/analysis.py`, you’ll find:
-
-- 📌 Distribution of 2-way and 6-way labels
-- 📌 Number of posts over time
-- 📈 Countplots and histograms using Seaborn
+* Distribution plots: `2_way_label_distribution.png`, `6_way_label_distribution.png`
+* Temporal trends: `post_year_distribution.png`
+* Scripts: `analysis_stats.py`, `utils/analysis.py`
 
 ---
 
 ## 🗃️ Dataset
 
-Dataset used:
-- **File**: `data/multimodal_test_public.tsv`
-- Columns used: `title`, `image_url`, `2_way_label`, `6_way_label`, `created_utc`
+* **File:** `data/multimodal_test_public.tsv`
+* **Columns:** `title`, `image_url`, `2_way_label`, `6_way_label`, `created_utc`
 
 ---
 
 ## 🧠 Training & Evaluation
 
-To train and evaluate all models across both 2-way and 6-way tasks:
+Train and evaluate across both 2-way and 6-way tasks:
 
 ```bash
 python main.py
 ```
 
-This will:
-- Train Early, Late, and Hybrid fusion models for both label sets
-- Print accuracy and F1-score comparisons
-- Save the best `Hybrid` models to `saved_models/` for use in the Streamlit app
+Train unimodal baselines:
+
+```bash
+python train_unimodal.py
+```
+
+Evaluate Gemini multimodal baseline:
+
+```bash
+python gemini_classifier.py
+```
+
+Results include accuracy, F1-score, and saved best models in `saved_models/`.
 
 ---
 
 ## 🌐 Streamlit App
 
-Use this app to test predictions by uploading an image and entering a caption.
-
-### Start the app:
+Launch the app for predictions:
 
 ```bash
 streamlit run streamlit_app.py
 ```
 
-### Features:
-- Upload post image
-- Enter caption or post title
-- Choose between 2-way and 6-way classification
-- View predicted label + confidence chart
+Features:
+
+* Upload image and enter caption
+* Select between 2-way or 6-way classification
+* Output: predicted label + confidence visualization
 
 ---
 
 ## 🧰 Requirements
 
-Install dependencies via:
+Install dependencies:
 
 ```bash
 pip install -r requirements.txt
@@ -108,27 +131,28 @@ pip install -r requirements.txt
 
 Key libraries:
 
-- `transformers`
-- `torch`
-- `streamlit`
-- `scikit-learn`
-- `pandas`, `matplotlib`, `seaborn`
+* `transformers`
+* `torch`
+* `streamlit`
+* `scikit-learn`
+* `pandas`, `matplotlib`, `seaborn`
 
 ---
 
 ## 📌 Notes
 
-- Make sure `saved_models/` contains:
-  - `hybrid_fusion_2_way_label_name.pt`
-  - `hybrid_fusion_6_way_label_name.pt`
-- Internet is required for downloading pre-trained BERT and ViT if not cached
-- The app automatically uses the hybrid fusion model for prediction
+* Ensure `saved_models/` contains:
+
+  * `hybrid_fusion_2_way_label_name.pt`
+  * `hybrid_fusion_6_way_label_name.pt`
+* Internet required for downloading pretrained BERT/ViT
+* Gemini outputs (`gemini_output_*.csv`) serve as benchmarks
 
 ---
 
-## 📦 To Zip for Submission
+## 📦 Packaging for Submission
 
-To create a zip with the entire folder:
+To create a zip for submission:
 
 ```bash
 zip -r multimodal-misinformation.zip . -x "*.ipynb_checkpoints*" "__pycache__/*" ".DS_Store"
@@ -136,9 +160,33 @@ zip -r multimodal-misinformation.zip . -x "*.ipynb_checkpoints*" "__pycache__/*"
 
 ---
 
+## 📐 Architecture Diagram
+
+```text
+            +-------------------+         +-------------------+
+            |    Text Encoder   |         |   Image Encoder   |
+            |       (BERT)      |         |        (ViT)      |
+            +-------------------+         +-------------------+
+                       |                           |
+                       |                           |
+                       +-----------+---------------+
+                                   |
+                         [ Fusion Layer ]
+                (Early Fusion | Late Fusion | Hybrid)
+                                   |
+                          +-----------------+
+                          |   Classifier    |
+                          +-----------------+
+                                   |
+                        Prediction (2-way / 6-way)
+```
+
+---
+
 ## 🙌 Acknowledgements
 
-- 🧷 HuggingFace Transformers
-- 🧠 BERT, ViT pre-trained models
-- 🔥 PyTorch + Streamlit
-- 🎓 This project is submitted as part of an MTech Dissertation
+* HuggingFace Transformers (BERT, ViT)
+* PyTorch
+* Streamlit
+* Google Gemini (benchmarking)
+* M.Tech Dissertation Guidance
